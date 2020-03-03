@@ -1,0 +1,12 @@
+[package]
+name = "cistern_two"
+version = "0.1.0"
+authors = ["Isabelle L. <me@izzabelle.dev>"]
+edition = "2018"
+
+[dependencies]
+toml = "0.5.6"
+serde = { version = "1.0.104", features = ["derive"] }
+serenity = "0.8.0"
+structopt = "0.3.9"
+lazy_static = "1.4.0"
