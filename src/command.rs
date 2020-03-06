@@ -2,8 +2,8 @@
 
 // command modules
 mod ping;
+mod scale;
 
-// namespacing
 use serenity::model::prelude::Message;
 use serenity::prelude::Context;
 use std::collections::VecDeque;
@@ -16,10 +16,10 @@ pub fn handle(context: Context, message: Message) {
     Command::from(&message).execute(context);
 }
 
-struct Command {
-    name: CommandName,
-    args: Args,
-    message: Message,
+pub struct Command {
+    pub name: CommandName,
+    pub args: Args,
+    pub message: Message,
 }
 
 impl std::convert::From<&Message> for Command {
@@ -36,16 +36,28 @@ impl Command {
     // execute a command
     fn execute(&self, context: Context) {
         match self.name {
-            CommandName::Ping => ping::run(context, &self.message),
+            CommandName::Ping => ping::run(context, self),
+            CommandName::VerseScale => scale::verse(context, self),
+            CommandName::VoreScale => scale::vore(context, self),
+            CommandName::BigScale => scale::big(context, self),
             CommandName::InvalidCommand => {}
         }
     }
+
+    // returns command's args as a string
+    fn args_as_string(&self) -> String {
+        let mut string = String::new();
+        self.args.iter().for_each(|arg| string = format!("{} {}", string, arg));
+        string
+    }
 }
 
-#[derive(Debug)]
-enum CommandName {
+pub enum CommandName {
     Ping,
     InvalidCommand,
+    VerseScale,
+    VoreScale,
+    BigScale,
 }
 
 impl std::convert::From<Option<String>> for CommandName {
@@ -57,6 +69,9 @@ impl std::convert::From<Option<String>> for CommandName {
 
         match command_name.as_str() {
             "ping" => Self::Ping,
+            "versescale" => Self::VerseScale,
+            "vorescale" => Self::VoreScale,
+            "bigscale" => Self::BigScale,
             _ => Self::InvalidCommand,
         }
     }
