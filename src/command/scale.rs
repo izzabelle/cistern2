@@ -36,7 +36,8 @@ pub fn verse(context: Context, command: &Command) {
         Verse::Bottom => format!("{} is a bottom", &command.args_as_string()),
     };
 
-    let _ = command.message.channel_id.say(&context.http, response);
+    let msg = command.message.channel_id.say(&context.http, response);
+    crate::print_if_err(msg);
 }
 
 enum Vore {
@@ -71,7 +72,8 @@ pub fn vore(context: Context, command: &Command) {
         Vore::Observer => format!("{} is an observer", &command.args_as_string()),
     };
 
-    let _ = command.message.channel_id.say(&context.http, response);
+    let msg = command.message.channel_id.say(&context.http, response);
+    crate::print_if_err(msg);
 }
 
 enum Big {
@@ -103,5 +105,6 @@ pub fn big(context: Context, command: &Command) {
         Big::Micro => format!("{} is a micro", &command.args_as_string()),
     };
 
-    let _ = command.message.channel_id.say(&context.http, response);
+    let msg = command.message.channel_id.say(&context.http, response);
+    crate::print_if_err(msg);
 }

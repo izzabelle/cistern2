@@ -1,8 +1,5 @@
 fn main() {
-    match cistern_two::main_wrapper() {
-        Ok(_) => {}
-        Err(e) => {
-            panic!("cistern has encountered an error: {:?}", e);
-        }
+    if let Err(e) = cistern_two::main_wrapper() {
+        panic!("cistern has encountered a fatal error: {:?}", e);
     }
 }

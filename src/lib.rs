@@ -1,6 +1,7 @@
 // modules
 mod command;
 mod config;
+mod moderation;
 
 //  module namespacing
 use config::*;
@@ -8,7 +9,7 @@ use config::*;
 // std/crate namespacing
 use serenity::client::{Client, EventHandler};
 use serenity::model::gateway::Ready;
-use serenity::model::prelude::Message;
+use serenity::model::prelude::{GuildId, Message, User};
 use serenity::prelude::Context;
 use std::convert::TryFrom;
 use structopt::StructOpt;
@@ -20,6 +21,8 @@ pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 struct Handler {
     api_token: String,
     prefix: String,
+    moderation_guild_id: u64,
+    moderation_channel_id: u64,
 }
 
 impl Handler {
@@ -38,12 +41,22 @@ impl Handler {
             config.development_token
         };
 
-        Ok(Self { api_token: discord_api_token, prefix: config.command_prefix })
+        Ok(Self {
+            api_token: discord_api_token,
+            prefix: config.command_prefix,
+            moderation_guild_id: config.moderation_guild_id,
+            moderation_channel_id: config.moderation_channel_id,
+        })
     }
 
     // check if a message contains a command
     fn is_command(&self, message: &Message) -> bool {
         message.content.as_bytes()[0] == self.prefix.as_bytes()[0]
+    }
+
+    // moderation ID's as tuple: `(guild_id, channel_id)`
+    fn mod_ids(&self) -> (u64, u64) {
+        (self.moderation_guild_id, self.moderation_channel_id)
     }
 }
 
@@ -62,13 +75,17 @@ impl EventHandler for Handler {
         if message.is_own(ctx.cache.to_owned()) {
             return;
         } else if self.is_command(&message) {
-            println!("recieved command");
+            print!("recieved command: ");
             command::handle(ctx, message);
         }
     }
+
+    fn guild_ban_addition(&self, ctx: Context, _guild_id: GuildId, user: User) {
+        moderation::user_banned(ctx, user, self.mod_ids());
+    }
 }
 
-// wrap everything so i can be lazy about error handling....
+/// wrap everything so i can be lazy about error handling....
 pub fn main_wrapper() -> Result<()> {
     let opt = config::Options::from_args();
     let handler = Handler::new(opt)?;
@@ -79,4 +96,11 @@ pub fn main_wrapper() -> Result<()> {
     }
 
     Ok(())
+}
+
+/// prints if there was an error on message sending
+pub fn print_if_err(msg_result: serenity::Result<Message>) {
+    if let Err(err) = msg_result {
+        println!("error sending message: {:?}", err);
+    }
 }

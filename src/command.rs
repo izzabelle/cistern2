@@ -13,7 +13,9 @@ type Args = VecDeque<String>;
 
 // wrap all of the command handling into a single message
 pub fn handle(context: Context, message: Message) {
-    Command::from(&message).execute(context);
+    let command = Command::from(&message);
+    println!("{:?} from {}#{}", &command.name, &message.author.name, &message.author.discriminator);
+    command.execute(context);
 }
 
 pub struct Command {
@@ -52,6 +54,7 @@ impl Command {
     }
 }
 
+#[derive(Debug)]
 pub enum CommandName {
     Ping,
     InvalidCommand,
