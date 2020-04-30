@@ -21,7 +21,6 @@ pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 struct Handler {
     api_token: String,
     prefix: String,
-    moderation_guild_id: u64,
     moderation_channel_id: u64,
 }
 
@@ -44,7 +43,6 @@ impl Handler {
         Ok(Self {
             api_token: discord_api_token,
             prefix: config.command_prefix,
-            moderation_guild_id: config.moderation_guild_id,
             moderation_channel_id: config.moderation_channel_id,
         })
     }
@@ -52,11 +50,6 @@ impl Handler {
     // check if a message contains a command
     fn is_command(&self, message: &Message) -> bool {
         message.content.as_bytes()[0] == self.prefix.as_bytes()[0]
-    }
-
-    // moderation ID's as tuple: `(guild_id, channel_id)`
-    fn mod_ids(&self) -> (u64, u64) {
-        (self.moderation_guild_id, self.moderation_channel_id)
     }
 }
 
@@ -81,7 +74,7 @@ impl EventHandler for Handler {
     }
 
     fn guild_ban_addition(&self, ctx: Context, _guild_id: GuildId, user: User) {
-        moderation::user_banned(ctx, user, self.mod_ids());
+        moderation::user_banned(ctx, user, self.moderation_channel_id);
     }
 }
 

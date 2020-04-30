@@ -12,7 +12,6 @@ pub struct Config {
     pub development_token: String,
     pub production_token: String,
     pub command_prefix: String,
-    pub moderation_guild_id: u64,
     pub moderation_channel_id: u64,
 }
 
